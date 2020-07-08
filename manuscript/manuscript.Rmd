@@ -1,0 +1,120 @@
+---
+title: Multi-scale validation of pixel-based forest inventories
+#date: "`r Sys.Date()`"
+authors:
+  - name: Brian Clough
+    email: brian@silviaterra.com
+    address: SilviaTerra
+    corresponding_author: yes
+  - name: Nan Poind
+    email: nan@silviaterra.com
+    address: SilviaTerra
+
+abstract: |
+  Pixel-based forest inventories, typically developed by linking plot data with remote sensing data, are increasingly used for both operational forestry and forest  conservation management. These methods are attractive as a low cost alternative to traditional cruising and because the "wall-to-wall" nature of pixel-based inventory aligns with many common operational goals, including stand delineation, strategic planning (i.e., acquisition and divestiture), and landscape management planning. Much of the current work on remote sensing in forestry focuses on products to support scientific research or global policy initiatives such as the United Nations Framework Convention on Climate Change. Operational foresters and land managers are very different consumers of data, and there is a need for metrics that define quality of pixel-based forest inventories for these use cases.
+
+  In this paper, we outline a framework for evaluating the quality of pixel-based forest inventories for use in operational forestry & conservation management contexts. We compare two datasets: (1) Basemap, a forestry layer produced by SilviaTerra; and (2) the Landscape Ecology, Mapping, and Analysis (LEMMA) dataset produced by the Pacific Northwest Research Station and Oregon State University. We demonstrate a multiscale approach to evaluating data product quality that includes: (1) checks of small area estimates against locally collected plot data; (2) mesoscale assessment within national forests; and (3) alignment of landscape population characteristics with the US Forest Inventory and Analysis (FIA) database. We assess both structural and species composition attributes. Results show that BLAH. We conclude that BLAH. Lastly, we end with a discussion on how these validation analyses can be incorporated into the decision-making process for forest managers interested in incorporating pixel-based forestry data into their inventory system.
+
+acknowledgements: |
+  This is an acknowledgement.
+
+  It consists of two paragraphs.
+keywords:
+  - key
+  - dictionary
+  - word
+#fontsize: 12pt
+#spacing: halfline # could also be oneline
+#classoptions:
+#  - endnotes
+bibliography: mybibfile.bib
+output: rticles::oup_article
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE) # By default, hide code; set to TRUE to see code
+knitr::opts_chunk$set(fig.pos = 'p') # Places figures on their own pages
+knitr::opts_chunk$set(out.width = '100%', dpi=300) # Figure resolution and size
+knitr::opts_chunk$set(fig.env="figure") # Latex figure environment
+
+library(xtable) # Creates tables that follow OUP guidelines; other options, such as kable, may also be workable
+```
+
+# Introduction
+
+At this point, model-assisted and model-based (MA/MB) forest inventory methods are firmly entrenched as a critical strategy for estimating forest resources from local to national scales, and for supporting global policy related to forests. Models utilizing plot data in combination with remote sensing data are necessary for developing consistent inventories in developing countries with no or only sparse inventory information. They are also popular in countries with established national forest inventories (NFIs), given the flexibility they provide for serving multiple information users (the development of both national population and small area estimates, for example).
+
+Model-based forest inventory is also becoming more prevalent in the private sector. These methods have been in wide use among larger forest landowners with means to develop internal capacity for several decades. Technological improvements such as low cost compute time and increasing availability of remote sensing data is now leading smaller operations to consider replacing or enhancing their traditional inventories by incorporating model-based approaches. Landowners at this scale are typically served by third party companies that invest in developing technological and methodological capacity for producing consistent, reliable model-based forest inventory. More recently, this dynamic is now driving non-traditional consumers of forest inventory data to access model-based products, such as conservation groups and small private landowners.
+
+There is an extensive literature devoted to methodological improvements on MB forest inventory. Much of this is devoted to improvements in production pipelines, whether this involves identifying new and/or optimal remote sensing predictors, determining the best statistical methods and models, or developing post-processing routines for increasing the reliability of model results. Additionally, there is a large literature focused on MA/MB approaches for estimating the mean and variance of both whole populations as well as small areas. This includes regression estimators designed to incorporate imagery effects, and to capture various ancillary sources of error such as measurement error or spatial autocorrelation. It also includes a companion literature on estimation with Bayesian models, where areal estimates arise naturally from a model's posterior predictive distribution.
+
+While these methods are well established, how they should be utilized to benchmark the quality of one or more MB inventory products has not been well explored. The attempts at developing benchmarking frameworks that do exist are primarily geared towards NFIs. For example, Reimann et al. [@riemann2010effective] described several generalized methods for assessing the quality of pixel-based layers of forest aboveground biomass against the United States Forest Service Forest Inventory and Analysis (FIA) data. Their tests involved evaluating the distribution of the MB inventory against that of the FIA data at the population scale, as well as assessing predictive performance for small areas with high densities of FIA plots. More recently Duncanson et al [@duncanson2019importance] described a framework for benchmarking carbon inventories produced via NFIs, within the context of the UN Framework Convention on Climate Change. Their approach aligns with the IPCC's recommended best practices for producing national greenhouse gas inventories, and is therefore focused more on procedure (how to rigorously account for uncertainty, for example) rather than on specific benchmarking targets. In addition, several ongoing and planned missions to produce forest biomass estimates from remote sensing platforms have set specific targets to benchmark quality. For example, the recently launched NASA GEDI program has established < 20% standard error for > 80% of 1 km forested cells. Meanwhile the ESA's BIOMASS mission is using different benchmark targets of root mean squared error (RMSE) depending on predicted carbon density.
+
+There are several common threads through all of these examples. One, they all relate to NFIs or aerial missions being conducted at the global scale. Second, the benchmarks they set are all developed in support of global forest policy, and particularly programs aimed at establishing international coordination on reducing greenhouse gas emissions via forest carbon offsets. These goals are important, but are not necessarily aligned with the information needs of operational foresters and forest conservation managers. To illustrate the potential differences, it useful to consider the reasons why a practicing forester might consider adopting MB inventory:
+  * To replace a standard forest inventory at lower cost (by collecting fewer plots).
+  * To partially replace a standard forest inventory for difficult to access or less valuable lands.
+  * To support strategic planning, such as acquisition and divestiture, where access to cruise a property is not permitted.
+  * In the case of landscape management planning, as a substitute for a prohibitively expensive data collection campaign.
+
+These cases require different levels of accuracy and precision, some of which are aligned with the benchmark goals of NFIs and others of which are not. For example, a timber company looking to adopt MB inventory for its holdings will likely require a level of accuracy and precision that is unachievable via models fit to NFI data alone. Strategic and landscape management planning, on the other hand, often require lower levels of precision and therefore may broadly overlap with what is needed to address international policy objectives.
+
+In order for MB approaches to be useful and broadly applicable across a range of applications, more clarity on how these products can be rigorously assessed for overall quality is needed. As discussed above, the methods for estimating MB mean and variance across a range of spatial scales are well established. What is not established is how you determine how much a particular MB product needs to improve for a given use case, and how you evaluate when you have reached "good enough". This of course is highly context dependent, based on the scale at which information is required and the trade off between cost and assumed risk. Given this, a highly flexible framework is desirable.
+
+To meet these needs, we suggest a predictive modeling framework for flexible benchmarking and assessment of multiple, disparate data products. In this framework, all inventories are regarded as models. A population estimate from an NFI is akin to a regression model with only an intercept term, whether it is a simple population estimate, or it incorporates additional hierarchy by stratifying the population into ecoregions or other subunits. Incorporating remote sensing predictors simply extends this general framework by introducing scale coefficients that describe deviations from the population mean at the basic unit of the inventory (the pixel). In this way we avoid the arbitrary distinction between population estimators and predictive models, and instead regard them all as different ways of describing a data generating process, utilizing varying degrees of information.
+
+The chief advantage of a predictive framework is that it allows us to organize benchmarking efforts as a set of descrete, testable questions such as:
+  * What is the improvement in accuracy and precision of pointwise predictions for sampled locations?
+  * What is the improvement in precision of pointwise predictions in unsampled locations?
+  * What is the improvement in accuracy and precision of small area estimates compared to a sample mean and variance of a stand-level cruise?
+  * What is the improvment in accuracy and precision for the population mean?
+  * Does an MB inventory sufficiently capture other features of the population distribution (minimum and maximum values, for example)?
+
+These type of benchmarks have a direct line to to well founded methods for evaluating models based on their predictive performance. These include familiar metrics of model quality such as root mean squared error, as well as less widely used techniques for checking model fit against the expected log pointwise predictive density (ELPPD) of a fitted model. It also includes posterior predictive checking, a general framework for assessing model fit based on the ability of the model to reproduce the fitting data that is widely used in the statistical literature. In addition to providing a framework for articulating clear, testable benchmarks, these predictive methods have the added benefit of allowing robust model evaluation against the same data used to fit the model. This is important for MB inventories, as there is rarely another unbiased sample of the population available aside from the data used to train the model.
+
+This paper outlines a benchmarking method based on predictive evaluation. We describe a "report card" approach that can be used to assess one or more inventory products for a given application, with the aim of developing a clear assessment on whether an MB inventory product is suitable for a given use case. We then illustrate the usability and flexibility of this approach by evaluating two MB inventory products, SilviaTerra Basemap and the Landscape Ecology, Mapping, and Analysis (LEMMA) dataset, for two hypothetical applications of MB forest inventory. Additionally, we will show how a robust benchmarking framework can be used to pursue improvements that will increase the quality of MB inventory data.
+
+# Materials and methods
+
+## Study area & reference data
+
+We conducted our analyses in the Sierra Nevada ecoregion of California, USA \@ref(fig:ecoreg_map). We selected the Sierra Nevadas because they exhibit a range of forest types along a distinct, elevational gradient and because both of the MB datasets we used in our comparison have full coverage for the region.
+
+The reference dataset we used for benchmarking MB inventories is the US Forest Service Forest Inventory and Analysis (FIA) data.
+
+```{r ecoreg_map, fig.cap="The Sierra Nevada ecoregion",echo=TRUE}
+plot(1:10,main="Some data",xlab="Distance (cm)",ylab="Time (hours)")
+```
+
+# Results
+
+Generate a figure.
+
+```{r fig1, fig.cap="This is the first figure.",echo=TRUE}
+plot(1:10,main="Some data",xlab="Distance (cm)",ylab="Time (hours)")
+```
+
+You can reference this figure as follows: Fig. \ref{fig:fig1}.
+
+```{r fig2, fig.cap="This is the second figure.",echo=TRUE}
+plot(1:5,pch=19,main="Some data",xlab="Distance (cm)",ylab="Time (hours)")
+```
+
+Reference to second figure: Fig. \ref{fig:fig2}
+
+Generate a table.
+
+```{r tab1, results="asis", echo=TRUE}
+df = data.frame(ID=1:3,code=letters[1:3])
+print(xtable(df,caption="This is the table caption",label="tab:tab1"),
+      comment=FALSE)
+```
+
+You can reference this table as follows: Table \ref{tab:tab1}.
+
+# Discussion
+
+You can cross-reference sections and subsections as follows: Section \ref{materials-and-methods} and Section \ref{a-subsection}.
+
+***Note:*** the last section in the document will be used as the section title for the bibliography.
+
+# References
