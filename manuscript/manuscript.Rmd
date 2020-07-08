@@ -75,11 +75,15 @@ This paper outlines a benchmarking method based on predictive evaluation. We des
 
 # Materials and methods
 
-## Study area & reference data
+## Study area
 
 We conducted our analyses in the Sierra Nevada ecoregion of California, USA \@ref(fig:ecoreg_map). We selected the Sierra Nevadas because they exhibit a range of forest types along a distinct, elevational gradient and because both of the MB datasets we used in our comparison have full coverage for the region.
 
-The reference dataset we used for benchmarking MB inventories is the US Forest Service Forest Inventory and Analysis (FIA) data.
+## Reference data for benchmarking
+
+To conduct the benchmarking analysis, we used two reference datasets: (1) US Forest Service Forest Inventory and Analysis (FIA) data and (2) data from two sites within the National Ecological Observatory Network (NEON). The FIA data served for making population & regional checks across all of the Sierras. The NEON data were used to conduct assessments of small area estimates within the larger landscape.
+
+
 
 ```{r ecoreg_map, fig.cap="The Sierra Nevada ecoregion",echo=TRUE}
 plot(1:10,main="Some data",xlab="Distance (cm)",ylab="Time (hours)")
